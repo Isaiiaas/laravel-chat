@@ -16,11 +16,12 @@ class Message extends Model
     public function user(): BelongsTo {
         return $this->belongsTo(User::class, 'user_id');
     }
+
     public function room(): BelongsTo {
         return $this->belongsTo(Room::class, 'room_id');
     }
 
-    public function getFormattedTimeAttribute(): string {
+    public function getTimeAttribute(): string {
         return date(
             "d M Y, H:i:s",
             strtotime($this->attributes['created_at'])

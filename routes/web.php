@@ -15,7 +15,7 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/dashboard', [DashboardController::class, 'dashboardView'])->name('dashboard');
     // Rooms
-    Route::get('room/{roomId}', [RoomController::class, 'roomView'])->where('roomId', '[0-9]+');
+    Route::get('room/{roomId}', [RoomController::class, 'roomView'])->where('roomId', '[0-9]+')->name('room');
     
     //Messages:
     Route::controller(MessageController::class)->group(function () {

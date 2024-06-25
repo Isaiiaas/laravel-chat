@@ -9,11 +9,16 @@ class Room extends Model
 {
     use HasFactory;
 
-    public $table = 'room';
-    protected $fillable = ['id', 'admin_id', 'name'];
+    public $table = 'rooms';
+    protected $fillable = [
+        'id', 
+        'admin_id', 
+        'name'
+    ];
 
     
-    public function admin(): BelongsTo {
+    public function admin(): BelongsTo
+    {
         return $this->belongsTo(User::class, 'admin_id');
     }
 }

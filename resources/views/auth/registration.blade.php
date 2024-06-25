@@ -1,6 +1,6 @@
 <h3>Registration</h3>
 
-<form action="{{ route('register.custom') }}" method="POST">
+<form action="{{ route('userRegister') }}" method="POST">
     @csrf
     
     <br/><input type="text" name="name">

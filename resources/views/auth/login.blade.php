@@ -1,5 +1,5 @@
 <h3>Login</h3>
-<form method="POST" action="{{ route('login.custom') }}">
+<form method="POST" action="{{ route('userLogin') }}">
     @csrf
     <br/><input type="text" placeholder="Email" id="email" name="email" required autofocus>
     <br/><input type="password" placeholder="Password" id="password" name="password" required>

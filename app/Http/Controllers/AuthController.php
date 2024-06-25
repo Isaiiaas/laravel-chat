@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\View;
 use Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 class AuthController extends Controller
 {
@@ -43,13 +44,20 @@ class AuthController extends Controller
     public function userRegister(Request $request): RedirectResponse
     {  
         $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-            'password' => ['required', 'min:6'], //Alternative: 'required|min:6'
+            'email' => ['required', 'email', 'unique:users'],
+            'password' => ['required', 'min:6'],
         ]);
         
-        $check = $this->userCreate($request->all());
-        return redirect("login");
+        $this->userCreate($request->all());
+
+        $credentials = $request->only('email', 'password');
+        Auth::attempt($credentials);
+        
+        $request->session()->regenerate();
+        return redirect()->route('dashboard')
+        
+        ->withSuccess('You have successfully registered & logged in!');
+
     }
 
     //Database Modification Functions

@@ -3,35 +3,35 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\RoomController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('login');
 });
 
 //Restricted Routes
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'dashboardView']);
+    
+    Route::get('/dashboard', [DashboardController::class, 'dashboardView'])->name('dashboard');
     // Rooms
-    // Route::get('rooms', [RoomsController::class, 'dashboard']);
-    // Route::put('rooms', [RoomsController::class, 'dashboard']);
-    // Messages: 
-    // Route::get('/messages/{roomId}', [RoomsController::class, 'dashboard'])->whereUuid('id');
-    // Route::put('/messages', [RoomsController::class, 'dashboard']); 
+    Route::get('room/{roomId}', [RoomController::class, 'roomView'])->where('roomId', '[0-9]+');
+    
+    //Messages:
+    Route::controller(MessageController::class)->group(function () {
+        Route::get('/messages/{roomId}', 'messageGet')->name('messageGet')->where('roomId', '[0-9]+');
+        Route::post('/messages', 'messageSend')->name('messageSend');
+    });
+
+    Route::get('/signout', [AuthController::class, 'signOut'])->name('signout');
 });
 
-// Route::middleware(['auth','adminAuth'])->group(function () {
-    // Route::get('room/new', [RoomsController::class, 'dashboard']); 
-    // Route::get('user/list', [DashboardController::class, 'dashboard']); 
-    // Route::poast('user/edit', [DashboardController::class, 'dashboard']); 
-// });
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'loginView')->name('login');
     Route::post('/login','userLogin')->name('userLogin');
     
-    Route::get('/register', 'registrationView')->name('register-user');
-    Route::post('/register', 'userRegister')->name('userRegister');
-    
-    Route::get('/signout', 'signOut')->name('signout');
+    Route::get('/register', 'registrationView')->name('register');
+    Route::post('/register', 'userRegister')->name('userRegister');    
 });
 

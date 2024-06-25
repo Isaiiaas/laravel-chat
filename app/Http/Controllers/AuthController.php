@@ -9,21 +9,37 @@ use Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Database\QueryException;
 
 class AuthController extends Controller
 {
-    // Views
+    /**
+     * Show the login view.
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
     public function loginView(): View
     {
         return view('auth.login');
     }
 
+    /**
+     * Show the registration view.
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
     public function registrationView(): View
     {
         return view('auth.registration');
     }
 
-    //Post Routes
+    /**
+     * Handle an incoming authentication request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function userLogin(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
@@ -41,26 +57,43 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
+    /**
+     * Handle an incoming registration request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function userRegister(Request $request): RedirectResponse
     {  
         $request->validate([
-            'email' => ['required', 'email', 'unique:users'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:email'],
             'password' => ['required', 'min:6'],
         ]);
         
-        $this->userCreate($request->all());
-
-        $credentials = $request->only('email', 'password');
-        Auth::attempt($credentials);
         
-        $request->session()->regenerate();
-        return redirect()->route('dashboard')
-        
-        ->withSuccess('You have successfully registered & logged in!');
+        try {
+            $this->userCreate($request->all());
 
+            Auth::attempt($request->only('name', 'email', 'password'));
+            
+            $request->session()->regenerate();
+            return redirect()->route('dashboard');
+
+        } catch (QueryException $e) {
+            return back()->withErrors([
+                'email' => 'The email has already been taken.',
+            ])->withInput();
+        }
     }
 
-    //Database Modification Functions
+    /**
+     * Create a new user (Insert into the Database).
+     *
+     * @param  array  $data
+     * @return \App\Models\User
+     */
     public function userCreate(array $data): User
     {
       return User::create([
@@ -70,8 +103,17 @@ class AuthController extends Controller
       ]);
     }
 
-    public function signOut() {
+    /**
+     * Log the user out of the application.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function signOut():RedirectResponse 
+    {
         Auth::logout();
-        return Redirect('login');
+
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect()->route('login');
     }
 }

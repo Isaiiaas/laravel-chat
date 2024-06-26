@@ -8,6 +8,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Message;
+use Illuminate\Support\Facades\Log;
+use App\Events\GotMessage;
 
 class SendMessage implements ShouldQueue
 {
@@ -30,12 +32,16 @@ class SendMessage implements ShouldQueue
      */
     public function handle(): void
     {
-        GotMessage::dispatch([
-            'id' => $this->message->id,
-            'user_id' => $this->message->user_id,
-            'room_id' => $this->message->room_id,
-            'text' => $this->message->text,
-            'time' => $this->message->time,
-        ]);
+        try {
+            GotMessage::dispatch([
+                'id' => $this->message->id,
+                'user_id' => $this->message->user_id,
+                'room_id' => $this->message->room_id,
+                'text' => $this->message->text,
+                'time' => $this->message->created_at,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to process SendMessage job: ' . $e->getMessage());
+        }
     }
 }

@@ -30,7 +30,7 @@ class GotMessage implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel(`room.{$this->message['room_id']}`),
+            new PrivateChannel("room.{$this->message['room_id']}")
         ];
     }
 

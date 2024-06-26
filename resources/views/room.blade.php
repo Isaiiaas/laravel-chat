@@ -5,6 +5,7 @@
 <a href="{{ route('dashboard') }}">Go Back to To Dashboard</a>
 <script>
     var roomId = {{ $roomId }};
+
     const scrollToBottom = (element) => element.scroll({ top: element.scrollHeight, behavior: 'smooth' });
 
     const updateMessages = (messages) => {
@@ -26,7 +27,7 @@
             messagesDiv.appendChild(row);
         }
         
-        scrollToBottom(messagesDiv);
+        setTimeout(()=> scrollToBottom(messagesDiv), 100);
     }
 
     const getMessages = async () => {
@@ -85,7 +86,16 @@
             });
     }
 
-    getMessages();
+    window.addEventListener("load", (event) => {
+        getMessages();
+
+        const roomWs = `room.${roomId}`;
+        window.Echo.private(roomWs)
+            .listen('GotMessage', async (e) => {
+                await getMessages();
+            });
+
+    });
 </script>
 <style>#messages { max-height: 400px; overflow-y: auto; overflow-x: hidden} textarea{ width:100%} </style>
 
